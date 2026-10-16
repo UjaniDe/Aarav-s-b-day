@@ -11,7 +11,7 @@
 </style>
 </head>
 <body><main class="page">
-<div class="float berry1" aria-hidden="true">🍓</div><div class="float berry2" aria-hidden="true">🍓</div><div class="float juice" aria-hidden="true">🍹</div><div class="float croissant" aria-hidden="true">🥐</div><div class="float glass" aria-hidden="true">🧃</div><span class="spark s1">✳</span><span class="spark s2">✴</span><span class="spark s3">✳</span>
+<div class="float berry1" aria-hidden="true">🍓</div><div class="float berry2" aria-hidden="true">🍓</div><div class="float juice" aria-hidden="true">🍹</div><div class="float croissant" aria-hidden="true">🥐</div><div class="float glass" aria-hidden="true">🧃</div><span class="spark s1"></span><span class="spark s2"></span><span class="spark s3"></span>
 <div class="inner">
 <p class="eyebrow">you're so invited to</p><h1 class="title">Aarav's<span>b'day</span></h1>
 <br>
@@ -24,9 +24,153 @@
 <h2 class="sectiontitle">what to wear?</h2><p class="note">Dress code will be assigned to you soon.no you don't need to take out your iron</p>
 <div class="venue"><span class="small"> MEET ME AT</span><strong>VIT Main Gate</strong>18 October 2026 · 2:00 PM</div>
 <div class="buttons"><button id="rsvpBtn" class="btn primary" type="button">♡ RSVP HERE</button><a class="btn secondary" href="https://www.google.com/maps/search/?api=1&query=VIT+Main+Gate+Vellore" target="_blank" rel="noopener noreferrer">↗ GET DIRECTIONS</a></div>
-<div class="rsvpbox" id="rsvpbox"><p>Are you coming? </p><div class="choices"><button type="button" class="choice" data-answer="I'll be there!">Ofc</button><button type="button" class="choice" data-answer="I can't make it">I mean yes? </button></div><input id="guestName" type="text" placeholder="your name" maxlength="65" autocomplete="name"/><button id="sendRsvp" class="btn primary" type="button" style="width:100%">SHARE MY RSVP ↗</button><div class="result" id="result" role="status" aria-live="polite">Choose an answer,or else.</div></div>
+<div class="rsvpbox" id="rsvpbox"><p>Are you coming? </p><div class="choices"><button type="button" class="choice" data-answer="I'll be there!">Ofc</button><button type="button" class="choice" data-answer="I can't make it">I mean yes? </button></div><input id="guestName" type="text" placeholder="your name" maxlength="65" autocomplete="name"/><button id="sendRsvp" class="btn primary" type="button" style="width:100%">SHARE MY RSVP </button><div class="result" id="result" role="status" aria-live="polite">Choose an answer,or else.</div></div>
 </div></main>
+
+<section id="confirmationScreen" style="
+  display:none;
+  min-height:100svh;
+  max-width:510px;
+  margin:auto;
+  padding:60px 25px;
+  background:#f6f0e3;
+  color:#1361c8;
+  text-align:center;
+  flex-direction:column;
+  align-items:center;
+  justify-content:center;
+  font-family:'DM Mono',monospace;
+">
+  <div style="font-size:70px">💌</div>
+
+  <p style="font-size:12px;letter-spacing:2px">
+    RSVP CONFIRMED
+  </p>
+
+  <h1 id="confirmationTitle" style="
+    font-family:'Caveat',cursive;
+    font-size:65px;
+    line-height:1;
+    margin:25px 0;
+  ">
+    yayyy!
+  </h1>
+
+  <p id="confirmationText" style="
+    font-size:12px;
+    line-height:2;
+    max-width:300px;
+  "></p>
+
+  <button id="shareConfirmation"
+    class="btn primary"
+    style="margin-top:30px;width:min(100%,300px)">
+    💌 SHARE MY RSVP
+  </button>
+
+  <button id="backToInvite"
+    class="btn secondary"
+    style="margin-top:12px;width:min(100%,300px)">
+    ← BACK TO INVITATION
+  </button>
+
+  <p id="shareStatus" class="result" role="status"></p>
+</section>
+
 <script>
-const box=document.getElementById('rsvpbox');document.getElementById('rsvpBtn').addEventListener('click',()=>{box.classList.toggle('open');if(box.classList.contains('open'))box.scrollIntoView({behavior:'smooth',block:'nearest'})});let answer='';document.querySelectorAll('.choice').forEach(button=>button.addEventListener('click',()=>{answer=button.dataset.answer;document.querySelectorAll('.choice').forEach(b=>b.classList.toggle('selected',b===button))}));document.getElementById('sendRsvp').addEventListener('click',async()=>{const name=document.getElementById('guestName').value.trim();const result=document.getElementById('result');if(!answer||!name){result.textContent='Add your name and choose an answer first ♡';return}const message=`Hey Clara! 🍓 It's ${name}. ${answer} for your birthday on 18 October! ♡`;if(navigator.share){try{await navigator.share({title:"RSVP for Clara's birthday",text:message});result.textContent='Your share sheet opened — send it to Clara to RSVP!';return}catch(e){if(e.name==='AbortError')return}}try{await navigator.clipboard.writeText(message);result.textContent='RSVP copied! Paste and send it to Clara 💌'}catch(e){result.textContent=message+' — copy this message and send it to Clara 💌'}});
+
+const box = document.getElementById('rsvpbox');
+const confirmation = document.getElementById('confirmationScreen');
+const page = document.querySelector('main.page');
+const result = document.getElementById('result');
+
+let answer = '';
+let rsvpMessage = '';
+
+document.getElementById('rsvpBtn').addEventListener('click', () => {
+  box.classList.toggle('open');
+
+  if (box.classList.contains('open')) {
+    box.scrollIntoView({
+      behavior: 'smooth',
+      block: 'nearest'
+    });
+  }
+});
+
+document.querySelectorAll('.choice').forEach(button => {
+  button.addEventListener('click', () => {
+    answer = button.dataset.answer;
+
+    document.querySelectorAll('.choice').forEach(b => {
+      b.classList.toggle('selected', b === button);
+    });
+  });
+});
+
+document.getElementById('sendRsvp').addEventListener('click', () => {
+  const name = document.getElementById('guestName').value.trim();
+
+  if (!answer || !name) {
+    result.textContent = 'Add your name and choose an answer first ♡';
+    return;
+  }
+
+  const coming = answer === "I'll be there!";
+
+  rsvpMessage =
+    `Hey Aarav! It's ${name}. ${answer} for your birthday on 18 October! ♡`;
+
+  document.getElementById('confirmationTitle').textContent =
+    coming ? `yayyy ${name}! ` : `ok sure ${name}! i mean`;
+
+  document.getElementById('confirmationText').textContent =
+    coming
+      ? "See ya"
+      : "see ya";
+
+  document.getElementById('shareStatus').textContent =
+    'copy that.';
+
+  page.style.display = 'none';
+  confirmation.style.display = 'flex';
+
+  window.scrollTo(0, 0);
+});
+
+document.getElementById('backToInvite').addEventListener('click', () => {
+  confirmation.style.display = 'none';
+  page.style.display = '';
+  box.classList.remove('open');
+  window.scrollTo(0, 0);
+});
+
+document.getElementById('shareConfirmation').addEventListener('click', async () => {
+  const status = document.getElementById('shareStatus');
+
+  if (navigator.share) {
+    try {
+      await navigator.share({
+        title: "RSVP for Aarav's birthday",
+        text: rsvpMessage
+      });
+
+      status.textContent = 'Thanks for sharing! 💌';
+      return;
+    } catch (e) {
+      if (e.name === 'AbortError') {
+        status.textContent = 'Sharing cancelled. Try again ♡';
+        return;
+      }
+    }
+  }
+
+  try {
+    await navigator.clipboard.writeText(rsvpMessage);
+    status.textContent = 'RSVP copied! Send it to Aarav 💌';
+  } catch (e) {
+    status.textContent = rsvpMessage;
+  }
+});
 </script>
 </body></html>
